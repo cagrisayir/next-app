@@ -14,11 +14,19 @@ export async function POST(request: NextRequest) {
 		return NextResponse.json(validation.error.errors[0].message, {
 			status: 400,
 		});
-	return NextResponse.json(
-		{
-			id: 1,
+
+	const user = await prisma.user.findUnique({
+		where: { email: body.email },
+	});
+	if (user)
+		return NextResponse.json({ error: 'User already exists' }, { status: 400 });
+
+	const newUser = await prisma.user.create({
+		data: {
 			name: body.name,
+			email: body.email,
 		},
-		{ status: 201 }
-	);
+	});
+
+	return NextResponse.json(newUser, { status: 201 });
 }
